@@ -4,6 +4,7 @@
   font-weight: 400;
 
   --bg: #0f0f12;
+  --header-bg: rgba(15, 15, 18, 0.92);
   --bg-card: #18181c;
   --bg-card-hover: #1e1e24;
   --text: #f0f0f2;
@@ -39,13 +40,11 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 #root {
   width: 100%;
+  min-height: 100vh;
 }
 
 h1, h2, h3 {
@@ -53,10 +52,6 @@ h1, h2, h3 {
   font-weight: 600;
   letter-spacing: -0.02em;
 }
-
-h1 { font-size: 2.5rem; }
-h2 { font-size: 1.5rem; color: var(--accent); }
-h3 { font-size: 1.125rem; color: var(--text-muted); font-weight: 500; }
 
 button {
   border-radius: 12px;
