@@ -1,42 +1,88 @@
-#root {
-  max-width: 1280px;
+.app {
+  max-width: 720px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 3rem 1.5rem;
   text-align: center;
 }
 
+.logos {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+  height: 4rem;
+  width: 4rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  will-change: filter, transform;
+  transition: filter 0.3s, transform 0.2s, box-shadow 0.2s;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 12px var(--glow));
+  transform: scale(1.05);
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 12px rgba(97, 218, 251, 0.4));
 }
 
 @keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
+  a:nth-of-type(2) .logo:hover {
+    animation-duration: 8s;
+  }
+}
+
+.headings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
 }
 
 .card {
-  padding: 2em;
+  padding: 2rem;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  border-color: rgba(250, 204, 21, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.card button {
+  min-width: 140px;
+}
+
+.card p {
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 .read-the-docs {
-  color: #888;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.read-the-docs a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
