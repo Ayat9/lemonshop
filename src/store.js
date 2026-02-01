@@ -2,10 +2,21 @@ const KEY = 'lemonshop'
 
 const defaultCategories = []
 const defaultProducts = []
-const defaultSettings = { whatsapp: '', instagram: '', tiktok: '' }
+const defaultSettings = {
+  whatsapp: '',
+  instagram: '',
+  tiktok: '',
+  adminPassword: 'admin123',
+  stockEnabled: false,
+  orderWhatsapp1: '',
+  orderWhatsapp2: '',
+  orderWhatsapp3: '',
+  orderWhatsapp4: '',
+}
 const defaultUsers = []
 const defaultVisits = 0
 const defaultTheme = 'dark'
+const defaultOrders = []
 
 function load() {
   try {
@@ -26,15 +37,36 @@ function save(data) {
   }
 }
 
+/** Миграция старого формата категорий (группы + items) в дерево (parentId + order) */
+function migrateCategories(list) {
+  if (!list?.length) return []
+  const first = list[0]
+  if (first.items !== undefined && Array.isArray(first.items)) {
+    const flat = []
+    let order = 0
+    list.forEach((cat) => {
+      flat.push({ id: cat.id, name: cat.name, parentId: null, order: order++ })
+      ;(cat.items || []).forEach((item, i) => {
+        flat.push({ id: item.id, name: item.name, parentId: cat.id, order: i })
+      })
+    })
+    return flat
+  }
+  return list
+}
+
 export function getStore() {
   const stored = load()
+  const rawCategories = stored?.categories ?? defaultCategories
+  const categories = migrateCategories(rawCategories)
   return {
     products: stored?.products ?? defaultProducts,
-    categories: stored?.categories ?? defaultCategories,
+    categories,
     settings: { ...defaultSettings, ...stored?.settings },
     users: stored?.users ?? defaultUsers,
     visits: stored?.visits ?? defaultVisits,
     theme: stored?.theme ?? defaultTheme,
+    orders: stored?.orders ?? defaultOrders,
   }
 }
 
@@ -46,6 +78,46 @@ export function saveStore(partial) {
 }
 
 export function nextId(items, key = 'id') {
-  const max = items.reduce((m, x) => Math.max(m, Number(x[key]) || 0), 0)
+  const max = items.reduce((m, x) => {
+    const v = x[key]
+    const n = typeof v === 'number' ? v : parseInt(v, 10)
+    return Math.max(m, isNaN(n) ? 0 : n)
+  }, 0)
   return max + 1
+}
+
+/** Строит дерево из плоского списка категорий */
+export function buildCategoryTree(categories) {
+  const byParent = new Map()
+  byParent.set(null, [])
+  categories.forEach((c) => {
+    const pid = c.parentId ?? null
+    if (!byParent.has(pid)) byParent.set(pid, [])
+    byParent.get(pid).push({ ...c, children: [] })
+  })
+  const sort = (arr) => arr.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  sort(byParent.get(null))
+  function fill(node) {
+    const kids = byParent.get(node.id) || []
+    sort(kids)
+    node.children = kids
+    kids.forEach(fill)
+  }
+  byParent.get(null).forEach(fill)
+  return byParent.get(null)
+}
+
+/** Плоский список категорий с путём (для селектов) */
+export function flatCategoryList(categories) {
+  const tree = buildCategoryTree(categories)
+  const out = []
+  function walk(nodes, path) {
+    nodes.forEach((n) => {
+      const p = path ? `${path} / ${n.name}` : n.name
+      out.push({ id: n.id, name: n.name, path: p })
+      walk(n.children || [], p)
+    })
+  }
+  walk(tree, '')
+  return out
 }

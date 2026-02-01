@@ -6,12 +6,148 @@
   color: var(--text);
 }
 
+/* Страница входа */
+.admin-login-page {
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.admin-login-box {
+  width: 100%;
+  max-width: 360px;
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+
+.admin-login-title {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-login-form label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.admin-login-form input {
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+}
+.admin-login-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.admin-login-form button {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1rem;
+}
+
+.admin-login-error {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #ef4444;
+}
+
+.admin-login-hint {
+  margin: 1rem 0 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.admin-login-back {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+
+.admin-logout {
+  margin-left: auto;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 2px solid #fff;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.admin-logout:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
 .admin-header {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  background: #1e3a5f;
+  color: #fff;
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
+}
+.admin-header .admin-back {
+  color: #bfdbfe;
+  text-decoration: none;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  transition: background 0.2s, color 0.2s;
+}
+.admin-header .admin-back:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+.admin-header .admin-title {
+  color: #fff;
+}
+
+/* Верхняя навигация */
+.admin-topnav {
+  display: flex;
+  gap: 0;
+  background: #334155;
+  padding: 0;
+  overflow-x: auto;
+  flex-wrap: wrap;
+}
+
+.admin-topnav-item {
+  padding: 0.7rem 1.2rem;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s;
+}
+.admin-topnav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+}
+.admin-topnav-item.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
 .admin-back {
@@ -30,49 +166,14 @@
   font-weight: 600;
 }
 
-.admin-body {
-  flex: 1;
-  display: flex;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.admin-sidebar {
-  width: 200px;
-  flex-shrink: 0;
-  padding: 1rem 0;
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.admin-nav-item {
-  padding: 0.6rem 1rem;
-  border: none;
-  background: none;
-  color: var(--text-muted);
-  font-size: 0.95rem;
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-  border-radius: 8px;
-  transition: background 0.2s, color 0.2s;
-}
-.admin-nav-item:hover {
-  background: var(--bg-card-hover);
-  color: var(--text);
-}
-.admin-nav-item.active {
-  background: var(--accent-dim);
-  color: var(--accent);
-}
-
 .admin-main {
   flex: 1;
   padding: 1.5rem;
-  overflow-x: auto;
+  overflow-x: hidden;
+  max-width: 100%;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .admin-section h2 {
@@ -223,15 +324,545 @@
   margin: 1rem 0;
 }
 
-@media (max-width: 768px) {
-  .admin-body {
+/* Дерево категорий */
+.admin-tree {
+  margin-top: 1rem;
+}
+
+.admin-tree-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.admin-tree-name {
+  font-weight: 500;
+  flex: 1;
+  min-width: 120px;
+}
+
+.admin-tree-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.admin-tree-actions select {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  min-width: 140px;
+}
+
+.admin-btn-small {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.admin-btn-small:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent);
+}
+
+.admin-btn-save {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid #22c55e;
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.admin-btn-save:hover {
+  background: rgba(34, 197, 94, 0.25);
+}
+
+/* Inline edit row */
+.admin-edit-row td {
+  padding: 0.35rem 0.5rem;
+}
+.admin-edit-row input,
+.admin-edit-row select {
+  width: 100%;
+  min-width: 60px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+}
+.admin-edit-row input:focus,
+.admin-edit-row select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.admin-edit-row td:last-child {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.admin-tree-edit-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+.admin-tree-edit-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* === Catalog section (товары + категории) === */
+.catalog-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: 100%;
+}
+
+.catalog-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.catalog-btn {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.catalog-btn:hover,
+.catalog-btn.active {
+  background: rgba(250, 204, 21, 0.25);
+}
+
+.catalog-search {
+  margin-left: auto;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+  min-width: 180px;
+}
+.catalog-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.catalog-filter-panel {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  flex-wrap: wrap;
+}
+.catalog-filter-panel input {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.catalog-filter-panel label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.catalog-add-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  flex-wrap: wrap;
+}
+.catalog-add-form h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.catalog-add-form input,
+.catalog-add-form select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+.catalog-add-form button {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+/* Catalog layout: tree + products */
+.catalog-layout {
+  display: flex;
+  flex: 1;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.catalog-tree-panel {
+  width: 260px;
+  max-width: 260px;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  overflow-y: auto;
+  overflow-x: auto;
+  max-height: calc(100vh - 280px);
+}
+
+.catalog-section {
+  overflow: hidden;
+  min-width: 0;
+}
+
+.catalog-tree-title {
+  padding: 0.6rem 0.75rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.catalog-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.catalog-tree-row:last-child {
+  border-bottom: none;
+}
+
+.catalog-tree-toggle {
+  width: 20px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.catalog-tree-toggle:hover {
+  color: var(--accent);
+}
+
+.catalog-tree-spacer {
+  width: 20px;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.catalog-tree-item {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+.catalog-tree-item:hover {
+  background: var(--bg-card-hover);
+}
+.catalog-tree-item.active {
+  background: rgba(255, 255, 255, 0.12);
+  font-weight: 500;
+}
+
+.catalog-tree-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.catalog-tree-row:hover .catalog-tree-actions {
+  opacity: 1;
+}
+
+.catalog-tree-action {
+  padding: 0.15rem 0.25rem;
+  font-size: 0.8rem;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 3px;
+}
+.catalog-tree-action:hover {
+  background: var(--bg-card-hover);
+  color: var(--text);
+}
+.catalog-tree-action.danger:hover {
+  color: #ef4444;
+}
+
+.catalog-tree-move {
+  padding: 0.1rem 0.2rem;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  max-width: 30px;
+}
+
+.catalog-products-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.catalog-products-header {
+  padding: 0.6rem 0.75rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.catalog-products-count {
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.catalog-products-panel .admin-table-wrap {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  overflow: auto;
+  max-height: calc(100vh - 320px);
+}
+
+/* === Modal === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 6px;
+  line-height: 1;
+}
+.modal-close:hover {
+  background: var(--bg-card-hover);
+  color: var(--text);
+}
+
+.modal-body {
+  padding: 1.25rem;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Product modal */
+.product-modal .product-modal-row {
+  margin-bottom: 1rem;
+}
+.product-modal label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+.product-modal input,
+.product-modal textarea,
+.product-modal select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+.product-modal textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+.product-modal input:focus,
+.product-modal textarea:focus,
+.product-modal select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.product-modal-barcode {
+  display: flex;
+  gap: 0.5rem;
+}
+.product-modal-barcode input {
+  flex: 1;
+}
+
+.product-modal-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.product-modal-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.product-modal-image-preview img {
+  max-width: 80px;
+  max-height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.product-modal-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.settings-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+.settings-checkbox input {
+  width: auto;
+}
+
+@media (max-width: 900px) {
+  .catalog-layout {
     flex-direction: column;
   }
-  .admin-sidebar {
+  .catalog-tree-panel {
     width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
+    max-height: 200px;
+  }
+  .catalog-products-panel .admin-table-wrap {
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-topnav-item {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
 import CartBar from '../components/CartBar'
 import './Home.css'
@@ -6,11 +7,21 @@ import './Home.css'
 const ITEMS_PER_PAGE = 6
 
 function Home() {
-  const { products, categories, settings, setTheme, theme, incrementVisits } = useStore()
+  const { products, categories, categoryTree, settings, incrementVisits } = useStore()
   const [cart, setCart] = useState({})
   const [activeCat, setActiveCat] = useState(null)
+  const [collapsedCats, setCollapsedCats] = useState(() => new Set())
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+
+  const toggleCategoryExpand = (id) => {
+    setCollapsedCats((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
 
   useEffect(() => {
     incrementVisits()
@@ -18,7 +29,7 @@ function Home() {
 
   const filtered = useMemo(() => {
     let list = products
-    if (activeCat) list = list.filter((p) => p.cat === activeCat)
+    if (activeCat != null) list = list.filter((p) => String(p.cat ?? '') === String(activeCat))
     if (search.trim()) {
       const q = search.trim().toLowerCase()
       list = list.filter(
@@ -29,6 +40,8 @@ function Home() {
     }
     return list
   }, [products, activeCat, search])
+
+  const isOutOfStock = (p) => settings.stockEnabled && p.stock != null && Number(p.stock) <= 0
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1
   const currentPage = Math.min(page, totalPages)
@@ -56,17 +69,19 @@ function Home() {
         <div className="header-inner">
           <a href="/" className="logo">Lemonshop</a>
           <nav className="nav">
-            <a href="/#catalog" className="nav-link">Каталог</a>
-            <a href="/admin" className="nav-link">Админ</a>
-            <button
-              type="button"
-              className="theme-toggle"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              title={theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
-              aria-label="Переключить тему"
+            <a
+              href="#/"
+              className="nav-link"
+              onClick={(e) => {
+                if (window.location.hash === '#/' || window.location.hash === '' || window.location.hash === '#') {
+                  e.preventDefault()
+                  document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
             >
-              {theme === 'dark' ? '☀️' : '🌙'}
-            </button>
+              Каталог
+            </a>
+            <Link to="/admin" className="nav-link">Админ</Link>
           </nav>
           {hasSocial && (
             <div className="header-social">
@@ -97,44 +112,74 @@ function Home() {
 
       <div className="main-wrap">
         <aside className="sidebar">
-          <a href="#catalog" className="sidebar-title">Все товары</a>
-          {categories.length === 0 ? (
+          <button
+            type="button"
+            className="sidebar-title sidebar-title-btn"
+            onClick={() => { setActiveCat(null); setPage(1); document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' }) }}
+          >
+            Все товары
+          </button>
+          {!categoryTree?.length ? (
             <p className="sidebar-empty">Категории пока пусты. Добавьте их в админ-панели.</p>
           ) : (
-            categories.map((cat) => (
-              <div key={cat.id} className="sidebar-group">
-                <div className="sidebar-group-name">{cat.name}</div>
-                {(cat.items || []).map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`sidebar-item ${activeCat === item.id ? 'active' : ''}`}
-                    onClick={() => {
-                      setActiveCat(activeCat === item.id ? null : item.id)
-                      setPage(1)
-                    }}
-                  >
-                    {item.name}
-                  </button>
-                ))}
-              </div>
-            ))
+            (function renderTree(nodes, depth = 0) {
+              return nodes.flatMap((node) => {
+                const hasChildren = node.children?.length > 0
+                const isExpanded = !collapsedCats.has(node.id)
+                return [
+                  <div key={node.id} className="sidebar-row" style={{ paddingLeft: `${12 + depth * 14}px` }}>
+                    {hasChildren ? (
+                      <button
+                        type="button"
+                        className="sidebar-toggle"
+                        onClick={(e) => { e.stopPropagation(); toggleCategoryExpand(node.id) }}
+                        title={isExpanded ? 'Свернуть' : 'Развернуть'}
+                        aria-label={isExpanded ? 'Свернуть' : 'Развернуть'}
+                      >
+                        {isExpanded ? '▼' : '▶'}
+                      </button>
+                    ) : (
+                      <span className="sidebar-spacer" />
+                    )}
+                    <button
+                      type="button"
+                      className={`sidebar-item ${String(activeCat) === String(node.id) ? 'active' : ''}`}
+                      onClick={() => {
+                        setActiveCat(String(activeCat) === String(node.id) ? null : node.id)
+                        setPage(1)
+                      }}
+                    >
+                      {node.name}
+                    </button>
+                  </div>,
+                  ...(hasChildren && isExpanded ? renderTree(node.children, depth + 1) : []),
+                ]
+              })
+            })(categoryTree)
           )}
         </aside>
 
-        <main className="content">
+        <main id="catalog" className="content">
           <div className="products-grid">
             {paginated.length === 0 ? (
               <p className="products-empty">Товаров пока нет или ничего не найдено по запросу.</p>
             ) : (
               paginated.map((p) => {
-                const qty = cart[p.id] || 0
-                const lineTotal = (p.price * qty).toFixed(2)
+                const boxQty = p.boxQty ?? 1
+                const boxes = cart[p.id] || 0
+                const totalPieces = boxes * boxQty
+                const lineTotal = (p.price * totalPieces).toFixed(2)
+                const outOfStock = isOutOfStock(p)
                 return (
-                  <article key={p.id} className="product-card">
+                  <article key={p.id} className={`product-card ${outOfStock ? 'product-card-disabled' : ''}`}>
+                    {p.imageData && <img src={p.imageData} alt="" className="product-card-image" />}
                     <h3 className="product-title">{p.title}</h3>
                     <p className="product-size">{p.size}</p>
-                    <p className="product-price">{p.price.toLocaleString('ru-KZ')}₸</p>
+                    <p className="product-price">{p.price.toLocaleString('ru-KZ')}₸/шт</p>
+                    {settings.stockEnabled && p.stock != null && (
+                      <p className="product-meta">Остаток: {p.stock} шт</p>
+                    )}
+                    <p className="product-meta">В коробке: {boxQty} шт · за коробку {(p.price * boxQty).toLocaleString('ru-KZ')}₸</p>
                     {(p.pack != null || p.box != null) && (
                       <p className="product-meta">
                         {p.pack != null && `в упак ${p.pack}шт`}
@@ -143,17 +188,23 @@ function Home() {
                       </p>
                     )}
                     {p.minOrder != null && (
-                      <p className="product-meta">заказ минимум {p.minOrder}шт</p>
+                      <p className="product-meta">заказ минимум {p.minOrder} кор.</p>
                     )}
                     {p.packOnly && <p className="product-pack-only">Только упаковкой</p>}
-                    <div className="product-actions">
-                      <button type="button" className="qty-btn" onClick={() => setQty(p.id, -1)} aria-label="Минус">−</button>
-                      <span className="qty-value">{qty}шт</span>
-                      <button type="button" className="qty-btn" onClick={() => setQty(p.id, 1)} aria-label="Плюс">+</button>
-                    </div>
-                    <p className="product-line">
-                      {qty}шт × {p.price.toFixed(2)} = {lineTotal}₸
-                    </p>
+                    {outOfStock ? (
+                      <p className="product-out-of-stock">Нет в наличии</p>
+                    ) : (
+                      <>
+                        <div className="product-actions">
+                          <button type="button" className="qty-btn" onClick={() => setQty(p.id, -1)} aria-label="Минус коробку">−</button>
+                          <span className="qty-value">{boxes} кор.</span>
+                          <button type="button" className="qty-btn" onClick={() => setQty(p.id, 1)} aria-label="Плюс коробку">+</button>
+                        </div>
+                        <p className="product-line">
+                          {boxes} кор. × ({boxQty} шт × {p.price}₸) = {lineTotal}₸
+                        </p>
+                      </>
+                    )}
                   </article>
                 )
               })

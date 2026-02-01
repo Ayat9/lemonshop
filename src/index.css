@@ -36,15 +36,17 @@ a:hover {
   color: var(--accent-soft);
 }
 
-body {
+html, body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 h1, h2, h3 {
@@ -121,4 +123,7 @@ code {
 }
 [data-theme="light"] .admin-btn-danger:hover {
   background: rgba(220, 38, 38, 0.2);
+}
+[data-theme="light"] .catalog-tree-item.active {
+  background: rgba(0, 0, 0, 0.06);
 }
