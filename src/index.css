@@ -82,3 +82,43 @@ code {
   border-radius: 6px;
   font-size: 0.9em;
 }
+
+/* Светлая тема */
+[data-theme="light"] {
+  --bg: #f8f9fa;
+  --header-bg: rgba(248, 249, 250, 0.95);
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0f1f3;
+  --text: #1a1a1a;
+  --text-muted: #6b7280;
+  --accent: #ca8a04;
+  --accent-soft: #a16207;
+  --accent-dim: rgba(202, 138, 4, 0.12);
+  --border: rgba(0, 0, 0, 0.08);
+  --glow: rgba(202, 138, 4, 0.2);
+
+  color-scheme: light;
+  color: var(--text);
+  background: var(--bg);
+  background-image: radial-gradient(ellipse 80% 50% at 50% -20%, var(--accent-dim), transparent);
+}
+[data-theme="light"] button {
+  background: var(--bg-card);
+  color: var(--text);
+}
+[data-theme="light"] .cart-whatsapp-btn {
+  border-color: #16a34a;
+  background: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
+}
+[data-theme="light"] .cart-whatsapp-btn:hover {
+  background: rgba(22, 163, 74, 0.2);
+}
+[data-theme="light"] .admin-btn-danger {
+  border-color: #dc2626;
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+[data-theme="light"] .admin-btn-danger:hover {
+  background: rgba(220, 38, 38, 0.2);
+}

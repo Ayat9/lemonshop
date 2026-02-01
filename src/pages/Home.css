@@ -1,0 +1,154 @@
+.search-wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.theme-toggle {
+  background: none;
+  border: none;
+  padding: 0.35rem 0.5rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.theme-toggle:hover {
+  background: var(--bg-card-hover);
+}
+
+.header-social {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.social-link {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+.social-link:hover {
+  color: var(--accent);
+}
+
+.sidebar-empty,
+.products-empty {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+/* Cart bar collapsible */
+.cart-bar {
+  position: sticky;
+  bottom: 0;
+  background: var(--header-bg);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  z-index: 50;
+}
+
+.cart-bar-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cart-bar-toggle:hover {
+  background: var(--bg-card-hover);
+}
+
+.cart-bar-chevron {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.cart-bar-content {
+  padding: 0 1.5rem 1rem;
+  border-top: 1px solid var(--border);
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.cart-list {
+  list-style: none;
+  margin: 0 0 1rem 0;
+  padding: 0;
+}
+
+.cart-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.cart-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.qty-btn.small {
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+  padding: 0;
+}
+
+.cart-bar-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.cart-whatsapp-btn {
+  display: inline-block;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  border: 1px solid #25d366;
+  background: rgba(37, 211, 102, 0.15);
+  color: #25d366;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.cart-whatsapp-btn:hover {
+  background: rgba(37, 211, 102, 0.25);
+}
