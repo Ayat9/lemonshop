@@ -12,6 +12,7 @@ const defaultSettings = {
   orderWhatsapp2: '',
   orderWhatsapp3: '',
   orderWhatsapp4: '',
+  logoUrl: '',
 }
 const defaultUsers = []
 const defaultVisits = 0
@@ -55,12 +56,32 @@ function migrateCategories(list) {
   return list
 }
 
+/** Миграция товаров: price → priceRetail, добавить priceOpt, article, createdAt */
+function migrateProducts(list) {
+  if (!list?.length) return list
+  return list.map((p) => {
+    const priceRetail = p.priceRetail ?? p.price ?? 0
+    const boxQty = Math.max(1, p.boxQty ?? 1)
+    const priceOpt = p.priceOpt ?? (p.price ? p.price * boxQty : priceRetail * boxQty)
+    return {
+      ...p,
+      priceRetail,
+      priceOpt,
+      price: priceRetail,
+      article: p.article ?? p.size ?? '',
+      createdAt: p.createdAt ?? p.created_at ?? new Date().toISOString(),
+    }
+  })
+}
+
 export function getStore() {
   const stored = load()
   const rawCategories = stored?.categories ?? defaultCategories
   const categories = migrateCategories(rawCategories)
+  const rawProducts = stored?.products ?? defaultProducts
+  const products = migrateProducts(rawProducts)
   return {
-    products: stored?.products ?? defaultProducts,
+    products,
     categories,
     settings: { ...defaultSettings, ...stored?.settings },
     users: stored?.users ?? defaultUsers,
@@ -75,6 +96,28 @@ export function saveStore(partial) {
   const next = { ...current, ...partial }
   save(next)
   return next
+}
+
+const CART_KEY = KEY + '_cart'
+
+export function loadCart() {
+  try {
+    const raw = localStorage.getItem(CART_KEY)
+    if (!raw) return { mode: 'retail', items: {} }
+    const data = JSON.parse(raw)
+    return { mode: data.mode === 'wholesale' ? 'wholesale' : 'retail', items: data.items || {} }
+  } catch {
+    return { mode: 'retail', items: {} }
+  }
+}
+
+export function saveCart(cartState) {
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cartState))
+    return true
+  } catch {
+    return false
+  }
 }
 
 export function nextId(items, key = 'id') {

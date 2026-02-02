@@ -1,13 +1,14 @@
 import { useState } from 'react'
 
 function OrderFormModal({ onConfirm, onClose }) {
-  const [form, setForm] = useState({ name: '', phone: '', address: '' })
+  const [form, setForm] = useState({ fio: '', phone: '', city: '', address: '' })
   const [errors, setErrors] = useState({})
 
   const validate = () => {
     const e = {}
-    if (!form.name?.trim()) e.name = 'Укажите имя'
+    if (!form.fio?.trim()) e.fio = 'Укажите ФИО'
     if (!form.phone?.trim()) e.phone = 'Укажите номер телефона'
+    if (!form.city?.trim()) e.city = 'Укажите город'
     if (!form.address?.trim()) e.address = 'Укажите адрес поставки'
     setErrors(e)
     return Object.keys(e).length === 0
@@ -16,7 +17,7 @@ function OrderFormModal({ onConfirm, onClose }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!validate()) return
-    onConfirm({ name: form.name.trim(), phone: form.phone.trim(), address: form.address.trim() })
+    onConfirm({ name: form.fio.trim(), phone: form.phone.trim(), city: form.city.trim(), address: form.address.trim() })
     onClose()
   }
 
@@ -30,16 +31,16 @@ function OrderFormModal({ onConfirm, onClose }) {
         <p className="order-form-hint">Пожалуйста, заполните обязательные поля перед оформлением заказа.</p>
         <form onSubmit={handleSubmit} className="modal-body">
           <div className="order-form-row">
-            <label htmlFor="order-name">Имя *</label>
+            <label htmlFor="order-fio">ФИО *</label>
             <input
-              id="order-name"
+              id="order-fio"
               type="text"
-              value={form.name}
-              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              placeholder="Как к вам обращаться"
-              className={errors.name ? 'order-form-error' : ''}
+              value={form.fio}
+              onChange={(e) => setForm((f) => ({ ...f, fio: e.target.value }))}
+              placeholder="Фамилия Имя Отчество"
+              className={errors.fio ? 'order-form-error' : ''}
             />
-            {errors.name && <span className="order-form-err-msg">{errors.name}</span>}
+            {errors.fio && <span className="order-form-err-msg">{errors.fio}</span>}
           </div>
           <div className="order-form-row">
             <label htmlFor="order-phone">Номер телефона *</label>
@@ -54,12 +55,24 @@ function OrderFormModal({ onConfirm, onClose }) {
             {errors.phone && <span className="order-form-err-msg">{errors.phone}</span>}
           </div>
           <div className="order-form-row">
+            <label htmlFor="order-city">Город *</label>
+            <input
+              id="order-city"
+              type="text"
+              value={form.city}
+              onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+              placeholder="Город"
+              className={errors.city ? 'order-form-error' : ''}
+            />
+            {errors.city && <span className="order-form-err-msg">{errors.city}</span>}
+          </div>
+          <div className="order-form-row">
             <label htmlFor="order-address">Адрес поставки *</label>
             <textarea
               id="order-address"
               value={form.address}
               onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-              placeholder="Город, улица, дом, квартира"
+              placeholder="Улица, дом, квартира"
               rows={3}
               className={errors.address ? 'order-form-error' : ''}
             />

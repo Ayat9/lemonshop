@@ -4,11 +4,13 @@ function ProductModal({ product, categories, stockEnabled, onSave, onClose }) {
   const isEdit = !!product?.id
   const [form, setForm] = useState({
     title: product?.title ?? '',
+    article: product?.article ?? product?.size ?? '',
     size: product?.size ?? '',
     barcode: product?.barcode ?? '',
     description: product?.description ?? '',
     costPrice: product?.costPrice ?? '',
-    price: product?.price ?? '',
+    priceRetail: product?.priceRetail ?? product?.price ?? '',
+    priceOpt: product?.priceOpt ?? '',
     boxQty: product?.boxQty ?? 1,
     stock: product?.stock ?? '',
     cat: product?.cat ?? '',
@@ -18,13 +20,21 @@ function ProductModal({ product, categories, stockEnabled, onSave, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    const boxQty = Math.max(1, Number(form.boxQty) || 1)
+    const priceRetail = Number(form.priceRetail) || 0
+    const priceOpt = form.priceOpt !== '' ? Number(form.priceOpt) : priceRetail * boxQty
     onSave({
       ...form,
       id: product?.id,
       costPrice: form.costPrice ? Number(form.costPrice) : null,
-      price: Number(form.price) || 0,
-      boxQty: Math.max(1, Number(form.boxQty) || 1),
+      price: priceRetail,
+      priceRetail,
+      priceOpt,
+      boxQty,
       stock: stockEnabled && form.stock !== '' ? Number(form.stock) : null,
+      article: form.article?.trim() || form.size?.trim() || '',
+      size: form.size?.trim() || form.article?.trim() || '',
+      createdAt: product?.createdAt ?? new Date().toISOString(),
     })
     onClose()
   }
@@ -118,26 +128,36 @@ function ProductModal({ product, categories, stockEnabled, onSave, onClose }) {
           </div>
           <div className="product-modal-row product-modal-row-2">
             <div>
-              <label>Закупочная цена, ₸</label>
+              <label>Цена розница (за шт), ₸ *</label>
               <input
                 type="number"
-                value={form.costPrice}
-                onChange={(e) => setForm((f) => ({ ...f, costPrice: e.target.value }))}
-                placeholder="0"
-                min={0}
-              />
-            </div>
-            <div>
-              <label>Цена продажи, ₸ *</label>
-              <input
-                type="number"
-                value={form.price}
-                onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                value={form.priceRetail}
+                onChange={(e) => setForm((f) => ({ ...f, priceRetail: e.target.value }))}
                 placeholder="0"
                 required
                 min={0}
               />
             </div>
+            <div>
+              <label>Цена опт (за коробку), ₸</label>
+              <input
+                type="number"
+                value={form.priceOpt}
+                onChange={(e) => setForm((f) => ({ ...f, priceOpt: e.target.value }))}
+                placeholder="авто (розница × в коробке)"
+                min={0}
+              />
+            </div>
+          </div>
+          <div className="product-modal-row">
+            <label>Закупочная цена, ₸</label>
+            <input
+              type="number"
+              value={form.costPrice}
+              onChange={(e) => setForm((f) => ({ ...f, costPrice: e.target.value }))}
+              placeholder="0"
+              min={0}
+            />
           </div>
           <div className="product-modal-row product-modal-row-2">
             <div>
@@ -164,14 +184,25 @@ function ProductModal({ product, categories, stockEnabled, onSave, onClose }) {
               </div>
             )}
           </div>
-          <div className="product-modal-row">
-            <label>Размер / артикул</label>
-            <input
-              type="text"
-              value={form.size}
-              onChange={(e) => setForm((f) => ({ ...f, size: e.target.value }))}
-              placeholder="Например: 9×9см"
-            />
+          <div className="product-modal-row product-modal-row-2">
+            <div>
+              <label>Артикул</label>
+              <input
+                type="text"
+                value={form.article}
+                onChange={(e) => setForm((f) => ({ ...f, article: e.target.value }))}
+                placeholder="Артикул"
+              />
+            </div>
+            <div>
+              <label>Размер</label>
+              <input
+                type="text"
+                value={form.size}
+                onChange={(e) => setForm((f) => ({ ...f, size: e.target.value }))}
+                placeholder="Например: 9×9 см"
+              />
+            </div>
           </div>
           <div className="product-modal-row">
             <label>Категория</label>

@@ -1,18 +1,38 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../context/StoreContext'
+import { loadCart, saveCart } from '../store'
 import CartBar from '../components/CartBar'
 import './Home.css'
 
-const ITEMS_PER_PAGE = 6
+const ITEMS_PER_PAGE = 12
+const NEW_DAYS = 7
 
 function Home() {
   const { products, categories, categoryTree, settings, incrementVisits } = useStore()
-  const [cart, setCart] = useState({})
+  const [cartState, setCartState] = useState(() => loadCart())
+  const { mode, items: cart } = cartState
+  const setCart = (updater) => {
+    setCartState((prev) => ({ ...prev, items: typeof updater === 'function' ? updater(prev.items) : updater }))
+  }
+  const setMode = (m) => setCartState((prev) => ({ ...prev, mode: m }))
+
   const [activeCat, setActiveCat] = useState(null)
   const [collapsedCats, setCollapsedCats] = useState(() => new Set())
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [priceMin, setPriceMin] = useState('')
+  const [priceMax, setPriceMax] = useState('')
+  const [inStockOnly, setInStockOnly] = useState(false)
+  const [sortBy, setSortBy] = useState('default')
+
+  useEffect(() => {
+    incrementVisits()
+  }, [incrementVisits])
+
+  useEffect(() => {
+    saveCart(cartState)
+  }, [cartState])
 
   const toggleCategoryExpand = (id) => {
     setCollapsedCats((prev) => {
@@ -23,25 +43,35 @@ function Home() {
     })
   }
 
-  useEffect(() => {
-    incrementVisits()
-  }, [incrementVisits])
+  const isOutOfStock = (p) => settings.stockEnabled && p.stock != null && Number(p.stock) <= 0
+  const isNew = (p) => {
+    const created = p.createdAt ? new Date(p.createdAt).getTime() : 0
+    return created && (Date.now() - created) < NEW_DAYS * 24 * 60 * 60 * 1000
+  }
 
   const filtered = useMemo(() => {
-    let list = products
+    let list = [...products]
     if (activeCat != null) list = list.filter((p) => String(p.cat ?? '') === String(activeCat))
     if (search.trim()) {
       const q = search.trim().toLowerCase()
       list = list.filter(
         (p) =>
           (p.title || '').toLowerCase().includes(q) ||
-          (p.size || '').toLowerCase().includes(q)
+          (p.size || '').toLowerCase().includes(q) ||
+          (p.article || '').toLowerCase().includes(q)
       )
     }
+    const prRetail = priceMin !== '' ? Number(priceMin) : null
+    const prMax = priceMax !== '' ? Number(priceMax) : null
+    if (prRetail != null) list = list.filter((p) => (p.priceRetail ?? p.price ?? 0) >= prRetail)
+    if (prMax != null) list = list.filter((p) => (p.priceRetail ?? p.price ?? 0) <= prMax)
+    if (inStockOnly) list = list.filter((p) => !isOutOfStock(p))
+    if (sortBy === 'priceAsc') list.sort((a, b) => (a.priceRetail ?? a.price ?? 0) - (b.priceRetail ?? b.price ?? 0))
+    else if (sortBy === 'priceDesc') list.sort((a, b) => (b.priceRetail ?? b.price ?? 0) - (a.priceRetail ?? a.price ?? 0))
+    else if (sortBy === 'name') list.sort((a, b) => (a.title || '').localeCompare(b.title || ''))
+    else if (sortBy === 'new') list.sort((a, b) => (new Date(b.createdAt || 0)) - (new Date(a.createdAt || 0)))
     return list
-  }, [products, activeCat, search])
-
-  const isOutOfStock = (p) => settings.stockEnabled && p.stock != null && Number(p.stock) <= 0
+  }, [products, activeCat, search, priceMin, priceMax, inStockOnly, sortBy])
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1
   const currentPage = Math.min(page, totalPages)
@@ -99,6 +129,24 @@ function Home() {
         </div>
       </header>
 
+      <div className="mode-bar">
+        <span className="mode-bar-label">Режим:</span>
+        <button
+          type="button"
+          className={`mode-btn ${mode === 'retail' ? 'mode-btn-active' : ''}`}
+          onClick={() => setMode('retail')}
+        >
+          Розница
+        </button>
+        <button
+          type="button"
+          className={`mode-btn ${mode === 'wholesale' ? 'mode-btn-active' : ''}`}
+          onClick={() => setMode('wholesale')}
+        >
+          Опт
+        </button>
+      </div>
+
       <div className="search-wrap">
         <input
           type="search"
@@ -108,6 +156,31 @@ function Home() {
           onChange={(e) => { setSearch(e.target.value); setPage(1) }}
           aria-label="Поиск"
         />
+      </div>
+
+      <div className="filters-bar">
+        <label className="filter-item">
+          <span>Цена от</span>
+          <input type="number" placeholder="0" value={priceMin} onChange={(e) => { setPriceMin(e.target.value); setPage(1) }} min={0} />
+        </label>
+        <label className="filter-item">
+          <span>до</span>
+          <input type="number" placeholder="—" value={priceMax} onChange={(e) => { setPriceMax(e.target.value); setPage(1) }} min={0} />
+        </label>
+        <label className="filter-item filter-checkbox">
+          <input type="checkbox" checked={inStockOnly} onChange={(e) => { setInStockOnly(e.target.checked); setPage(1) }} />
+          <span>В наличии</span>
+        </label>
+        <label className="filter-item">
+          <span>Сортировка</span>
+          <select value={sortBy} onChange={(e) => { setSortBy(e.target.value); setPage(1) }}>
+            <option value="default">По умолчанию</option>
+            <option value="priceAsc">Цена: по возрастанию</option>
+            <option value="priceDesc">Цена: по убыванию</option>
+            <option value="name">По названию</option>
+            <option value="new">Сначала новые</option>
+          </select>
+        </label>
       </div>
 
       <div className="main-wrap">
@@ -166,42 +239,40 @@ function Home() {
             ) : (
               paginated.map((p) => {
                 const boxQty = p.boxQty ?? 1
-                const boxes = cart[p.id] || 0
-                const totalPieces = boxes * boxQty
-                const lineTotal = (p.price * totalPieces).toFixed(2)
+                const priceRetail = p.priceRetail ?? p.price ?? 0
+                const priceOpt = p.priceOpt ?? priceRetail * boxQty
+                const isRetail = mode === 'retail'
+                const qty = cart[p.id] || 0
+                const lineTotal = isRetail ? (qty * priceRetail).toFixed(2) : (qty * priceOpt).toFixed(2)
                 const outOfStock = isOutOfStock(p)
+                const newBadge = isNew(p)
                 return (
                   <article key={p.id} className={`product-card ${outOfStock ? 'product-card-disabled' : ''}`}>
+                    {newBadge && <span className="product-badge-new">NEW</span>}
                     {p.imageData && <img src={p.imageData} alt="" className="product-card-image" />}
                     <h3 className="product-title">{p.title}</h3>
-                    <p className="product-size">{p.size}</p>
-                    <p className="product-price">{p.price.toLocaleString('ru-KZ')}₸/шт</p>
+                    {(p.article || p.size) && <p className="product-article">Артикул: {p.article || p.size}</p>}
+                    {p.barcode && <p className="product-meta">Штрих-код: {p.barcode}</p>}
+                    {isRetail ? (
+                      <p className="product-price">{priceRetail.toLocaleString('ru-KZ')}₸/шт</p>
+                    ) : (
+                      <p className="product-price">{priceOpt.toLocaleString('ru-KZ')}₸/кор</p>
+                    )}
                     {settings.stockEnabled && p.stock != null && (
                       <p className="product-meta">Остаток: {p.stock} шт</p>
                     )}
-                    <p className="product-meta">В коробке: {boxQty} шт · за коробку {(p.price * boxQty).toLocaleString('ru-KZ')}₸</p>
-                    {(p.pack != null || p.box != null) && (
-                      <p className="product-meta">
-                        {p.pack != null && `в упак ${p.pack}шт`}
-                        {p.pack != null && p.box != null && ' · '}
-                        {p.box != null && `в кор ${p.box}шт`}
-                      </p>
-                    )}
-                    {p.minOrder != null && (
-                      <p className="product-meta">заказ минимум {p.minOrder} кор.</p>
-                    )}
-                    {p.packOnly && <p className="product-pack-only">Только упаковкой</p>}
+                    {!isRetail && <p className="product-meta">В коробке: {boxQty} шт</p>}
                     {outOfStock ? (
                       <p className="product-out-of-stock">Нет в наличии</p>
                     ) : (
                       <>
                         <div className="product-actions">
-                          <button type="button" className="qty-btn" onClick={() => setQty(p.id, -1)} aria-label="Минус коробку">−</button>
-                          <span className="qty-value">{boxes} кор.</span>
-                          <button type="button" className="qty-btn" onClick={() => setQty(p.id, 1)} aria-label="Плюс коробку">+</button>
+                          <button type="button" className="qty-btn" onClick={() => setQty(p.id, -1)} aria-label="Минус">−</button>
+                          <span className="qty-value">{isRetail ? `${qty} шт` : `${qty} кор`}</span>
+                          <button type="button" className="qty-btn" onClick={() => setQty(p.id, 1)} aria-label="Плюс">+</button>
                         </div>
                         <p className="product-line">
-                          {boxes} кор. × ({boxQty} шт × {p.price}₸) = {lineTotal}₸
+                          {isRetail ? `${qty} шт × ${priceRetail}₸` : `${qty} кор × ${priceOpt}₸`} = {lineTotal}₸
                         </p>
                       </>
                     )}
@@ -228,7 +299,7 @@ function Home() {
         </main>
       </div>
 
-      <CartBar cart={cart} setCart={setCart} products={products} />
+      <CartBar cart={cart} setCart={setCart} mode={mode} products={products} />
     </div>
   )
 }

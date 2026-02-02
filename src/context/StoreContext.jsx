@@ -20,15 +20,23 @@ export function StoreProvider({ children }) {
 
   const addProduct = useCallback((product) => {
     const id = nextId(store.products)
+    const boxQty = product.boxQty ?? 1
+    const priceRetail = product.priceRetail ?? product.price ?? 0
+    const priceOpt = product.priceOpt ?? priceRetail * boxQty
     const newProduct = {
       ...product,
       id,
-      boxQty: product.boxQty ?? 1,
+      boxQty,
+      priceRetail,
+      priceOpt,
+      price: priceRetail,
       costPrice: product.costPrice ?? null,
       barcode: product.barcode ?? '',
       description: product.description ?? '',
       stock: product.stock ?? null,
       imageData: product.imageData ?? null,
+      article: product.article ?? product.size ?? '',
+      createdAt: product.createdAt ?? new Date().toISOString(),
     }
     update({ products: [...store.products, newProduct] })
     return newProduct

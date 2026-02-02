@@ -312,6 +312,31 @@
   color: var(--accent);
 }
 
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.admin-stat-card {
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.admin-stat-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.admin-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
 .admin-hint {
   font-size: 0.85rem;
   color: var(--text-muted);

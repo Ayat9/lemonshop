@@ -121,14 +121,17 @@ function Admin() {
       id: p.id,
       title: p.title || '',
       size: p.size || '',
+      article: p.article ?? p.size ?? '',
       barcode: p.barcode || '',
       description: p.description || '',
       costPrice: p.costPrice ?? '',
-      price: p.price ?? '',
+      priceRetail: p.priceRetail ?? p.price ?? '',
+      priceOpt: p.priceOpt ?? '',
       boxQty: p.boxQty ?? 1,
       stock: p.stock ?? '',
       cat: p.cat ?? '',
       imageData: p.imageData ?? null,
+      createdAt: p.createdAt ?? null,
     })
     setShowProductModal(true)
   }
@@ -192,12 +195,12 @@ function Admin() {
   }
 
   // User form
-  const [userForm, setUserForm] = useState({ name: '', email: '', role: 'user' })
+  const [userForm, setUserForm] = useState({ name: '', email: '', role: 'manager' })
 
   const handleAddUser = (e) => {
     e.preventDefault()
     addUser({ name: userForm.name.trim(), email: userForm.email.trim(), role: userForm.role })
-    setUserForm({ name: '', email: '', role: 'user' })
+    setUserForm({ name: '', email: '', role: 'manager' })
   }
 
   // Settings form — sync when opening settings tab
@@ -211,6 +214,7 @@ function Admin() {
     orderWhatsapp2: settings.orderWhatsapp2 || '',
     orderWhatsapp3: settings.orderWhatsapp3 || '',
     orderWhatsapp4: settings.orderWhatsapp4 || '',
+    logoUrl: settings.logoUrl || '',
   })
   useEffect(() => {
     if (section === 'settings') {
@@ -224,9 +228,10 @@ function Admin() {
         orderWhatsapp2: settings.orderWhatsapp2 || '',
         orderWhatsapp3: settings.orderWhatsapp3 || '',
         orderWhatsapp4: settings.orderWhatsapp4 || '',
+        logoUrl: settings.logoUrl || '',
       })
     }
-  }, [section, settings.whatsapp, settings.instagram, settings.tiktok, settings.adminPassword, settings.stockEnabled, settings.orderWhatsapp1, settings.orderWhatsapp2, settings.orderWhatsapp3, settings.orderWhatsapp4])
+  }, [section, settings.whatsapp, settings.instagram, settings.tiktok, settings.adminPassword, settings.stockEnabled, settings.orderWhatsapp1, settings.orderWhatsapp2, settings.orderWhatsapp3, settings.orderWhatsapp4, settings.logoUrl])
 
   const handleSaveSettings = (e) => {
     e.preventDefault()
@@ -402,8 +407,9 @@ function Admin() {
                       <thead>
                         <tr>
                           <th>Название</th>
-                          <th>Размер</th>
-                          <th>Цена</th>
+                          <th>Артикул</th>
+                          <th>Розница</th>
+                          <th>Опт (кор.)</th>
                           <th>В коробке</th>
                           {settings.stockEnabled && <th>Остаток</th>}
                           <th></th>
@@ -413,8 +419,9 @@ function Admin() {
                         {filteredProducts.map((p) => (
                           <tr key={p.id}>
                             <td>{p.title}</td>
-                            <td>{p.size}</td>
-                            <td>{p.price}₸</td>
+                            <td>{p.article ?? p.size ?? '—'}</td>
+                            <td>{(p.priceRetail ?? p.price ?? 0).toLocaleString('ru-KZ')}₸</td>
+                            <td>{(p.priceOpt ?? (p.price ?? 0) * (p.boxQty ?? 1)).toLocaleString('ru-KZ')}₸</td>
                             <td>{(p.boxQty ?? 1)} шт</td>
                             {settings.stockEnabled && <td>{p.stock != null ? `${p.stock} шт` : '—'}</td>}
                             <td>
@@ -442,8 +449,9 @@ function Admin() {
                     <tr>
                       <th>№</th>
                       <th>Дата</th>
-                      <th>Клиент</th>
+                      <th>Клиент (ФИО)</th>
                       <th>Телефон</th>
+                      <th>Город</th>
                       <th>Адрес</th>
                       <th>Сумма</th>
                       <th></th>
@@ -454,7 +462,7 @@ function Admin() {
                       editingOrderId === o.id ? (
                         <tr key={o.id} className="admin-edit-row">
                           <td>{o.id}</td>
-                          <td colSpan={6}>
+                          <td colSpan={7}>
                             <form
                               onSubmit={(e) => {
                                 e.preventDefault()
@@ -465,7 +473,7 @@ function Admin() {
                               style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
                             >
                               <div>
-                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Имя</label>
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ФИО</label>
                                 <input
                                   value={orderEditForm?.name ?? ''}
                                   onChange={(e) => setOrderEditForm((f) => ({ ...f, name: e.target.value }))}
@@ -477,6 +485,14 @@ function Admin() {
                                 <input
                                   value={orderEditForm?.phone ?? ''}
                                   onChange={(e) => setOrderEditForm((f) => ({ ...f, phone: e.target.value }))}
+                                  style={{ width: '100%', padding: '0.4rem' }}
+                                />
+                              </div>
+                              <div>
+                                <label style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Город</label>
+                                <input
+                                  value={orderEditForm?.city ?? ''}
+                                  onChange={(e) => setOrderEditForm((f) => ({ ...f, city: e.target.value }))}
                                   style={{ width: '100%', padding: '0.4rem' }}
                                 />
                               </div>
@@ -501,10 +517,11 @@ function Admin() {
                           <td>{o.createdAt ? new Date(o.createdAt).toLocaleString('ru-KZ') : '—'}</td>
                           <td>{o.client?.name ?? '—'}</td>
                           <td>{o.client?.phone ?? '—'}</td>
-                          <td style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={o.client?.address}>{o.client?.address ?? '—'}</td>
+                          <td>{o.client?.city ?? '—'}</td>
+                          <td style={{ maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={o.client?.address}>{o.client?.address ?? '—'}</td>
                           <td>{(o.totalSum ?? 0).toLocaleString('ru-KZ')}₸</td>
                           <td>
-                            <button type="button" className="admin-btn-small" onClick={() => { setEditingOrderId(o.id); setOrderEditForm({ ...o.client }); }}>✏️ Редактировать</button>
+                            <button type="button" className="admin-btn-small" onClick={() => { setEditingOrderId(o.id); setOrderEditForm({ name: o.client?.name, phone: o.client?.phone, city: o.client?.city, address: o.client?.address }); }}>✏️ Редактировать</button>
                           </td>
                         </tr>
                       )
@@ -523,8 +540,8 @@ function Admin() {
                 <input type="text" placeholder="Имя" value={userForm.name} onChange={(e) => setUserForm((f) => ({ ...f, name: e.target.value }))} required />
                 <input type="email" placeholder="Email" value={userForm.email} onChange={(e) => setUserForm((f) => ({ ...f, email: e.target.value }))} />
                 <select value={userForm.role} onChange={(e) => setUserForm((f) => ({ ...f, role: e.target.value }))}>
-                  <option value="user">Пользователь</option>
-                  <option value="admin">Админ</option>
+                  <option value="manager">Менеджер</option>
+                  <option value="admin">Администратор</option>
                 </select>
                 <button type="submit">Добавить</button>
               </form>
@@ -551,9 +568,19 @@ function Admin() {
 
           {section === 'visits' && (
             <section className="admin-section">
-              <h2>Посещения сайта</h2>
-              <p className="admin-stat">Всего визитов: <strong>{visits}</strong></p>
-              <p className="admin-hint">Счётчик увеличивается при каждом открытии главной страницы.</p>
+              <h2>Статистика</h2>
+              <div className="admin-stats-grid">
+                <div className="admin-stat-card">
+                  <span className="admin-stat-label">Посещения сайта</span>
+                  <span className="admin-stat-value">{visits}</span>
+                  <p className="admin-hint">При каждом открытии главной страницы</p>
+                </div>
+                <div className="admin-stat-card">
+                  <span className="admin-stat-label">Заказов</span>
+                  <span className="admin-stat-value">{orders?.length ?? 0}</span>
+                  <p className="admin-hint">Всего оформленных заказов</p>
+                </div>
+              </div>
             </section>
           )}
 
@@ -562,6 +589,13 @@ function Admin() {
               <h2>Настройки</h2>
               <form className="admin-form settings-form" onSubmit={handleSaveSettings}>
                 <h3>Контакты (отображаются на главной)</h3>
+                <label>Логотип для PDF (URL или путь, например /logo.png)</label>
+                <input
+                  type="text"
+                  placeholder="/logo.png или https://..."
+                  value={settingsForm.logoUrl}
+                  onChange={(e) => setSettingsForm((f) => ({ ...f, logoUrl: e.target.value }))}
+                />
                 <label>WhatsApp (основной, для ссылки на главной)</label>
                 <input
                   type="text"
