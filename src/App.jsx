@@ -1,19 +1,29 @@
-import { HashRouter, Routes, Route } from 'react-router-dom'
-import { StoreProvider } from './context/StoreContext'
-import Home from './pages/Home'
-import Admin from './pages/Admin'
-import './App.css'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AppProvider } from './context/AppContext'
+import RequireAuth from './components/RequireAuth'
+import AppShell from './layouts/AppShell'
+import Login from './pages/Login'
+import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
-    <StoreProvider>
+    <AppProvider>
       <HashRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            element={
+              <RequireAuth>
+                <AppShell />
+              </RequireAuth>
+            }
+          >
+            <Route index element={<Dashboard />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </HashRouter>
-    </StoreProvider>
+    </AppProvider>
   )
 }
 

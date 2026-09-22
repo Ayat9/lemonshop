@@ -10,9 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "canvg": "^4.0.3",
-    "html2pdf.js": "^0.14.0",
-    "jspdf": "^4.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.13.0"
@@ -27,6 +24,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "playwright": "^1.49.0",
     "vite": "^7.2.4"
   }
 }

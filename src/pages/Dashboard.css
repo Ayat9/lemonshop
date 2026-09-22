@@ -1,0 +1,162 @@
+.dashboard-header h1 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.5rem;
+}
+
+.dashboard-greeting {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.stat-card {
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  cursor: default;
+}
+
+button.stat-card {
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+
+button.stat-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.stat-card--danger {
+  border-color: var(--match-none-border);
+  background: var(--match-none-bg);
+}
+
+.stat-card--danger .stat-value {
+  color: var(--match-none-border);
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-panel {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  background: var(--bg-card);
+}
+
+.dashboard-panel h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dashboard-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dashboard-panel-head h2 {
+  margin: 0;
+}
+
+.dashboard-empty {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.dashboard-task-list,
+.dashboard-load-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dashboard-task-list li {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.dashboard-task-list li.is-overdue {
+  border-color: var(--match-none-border);
+  background: var(--match-none-bg);
+}
+
+.task-meta {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.dashboard-load-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.dashboard-load-list li:last-child {
+  border-bottom: none;
+}
+
+.load-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.load-count {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.load-overdue {
+  font-size: 0.75rem;
+  color: var(--match-none-border);
+}

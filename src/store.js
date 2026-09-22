@@ -1,23 +1,59 @@
-const KEY = 'lemonshop'
+const KEY = 'lemonshop_hrm'
 
-const defaultCategories = []
-const defaultProducts = []
-const defaultSettings = {
-  whatsapp: '',
-  instagram: '',
-  tiktok: '',
-  adminPassword: 'admin123',
-  stockEnabled: false,
-  orderWhatsapp1: '',
-  orderWhatsapp2: '',
-  orderWhatsapp3: '',
-  orderWhatsapp4: '',
-  logoUrl: '',
-}
-const defaultUsers = []
-const defaultVisits = 0
-const defaultTheme = 'dark'
-const defaultOrders = []
+const DEFAULT_ROLES = [
+  {
+    id: 1,
+    name: 'CEO / Владелец',
+    permissions: {
+      dashboard: true,
+      tasks: true,
+      employees: true,
+      tactical: true,
+      org: true,
+      roles: true,
+      settings: true,
+    },
+  },
+  {
+    id: 2,
+    name: 'Директор / Управляющий',
+    permissions: {
+      dashboard: true,
+      tasks: true,
+      employees: true,
+      tactical: true,
+      org: true,
+      roles: false,
+      settings: false,
+    },
+  },
+  {
+    id: 3,
+    name: 'Менеджер',
+    permissions: {
+      dashboard: true,
+      tasks: true,
+      employees: false,
+      tactical: false,
+      org: false,
+      roles: false,
+      settings: false,
+    },
+  },
+  {
+    id: 4,
+    name: 'Сотрудник точки',
+    permissions: {
+      dashboard: true,
+      tasks: true,
+      employees: false,
+      tactical: false,
+      org: false,
+      roles: false,
+      settings: false,
+    },
+  },
+]
 
 function load() {
   try {
@@ -38,56 +74,55 @@ function save(data) {
   }
 }
 
-/** Миграция старого формата категорий (группы + items) в дерево (parentId + order) */
-function migrateCategories(list) {
-  if (!list?.length) return []
-  const first = list[0]
-  if (first.items !== undefined && Array.isArray(first.items)) {
-    const flat = []
-    let order = 0
-    list.forEach((cat) => {
-      flat.push({ id: cat.id, name: cat.name, parentId: null, order: order++ })
-      ;(cat.items || []).forEach((item, i) => {
-        flat.push({ id: item.id, name: item.name, parentId: cat.id, order: i })
-      })
-    })
-    return flat
+export function hashPassword(password) {
+  let h = 0
+  const s = String(password)
+  for (let i = 0; i < s.length; i += 1) {
+    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0
   }
-  return list
+  return `h${h >>> 0}`
 }
 
-/** Миграция товаров: price → priceRetail, добавить priceOpt, article, createdAt */
-function migrateProducts(list) {
-  if (!list?.length) return list
-  return list.map((p) => {
-    const priceRetail = p.priceRetail ?? p.price ?? 0
-    const boxQty = Math.max(1, p.boxQty ?? 1)
-    const priceOpt = p.priceOpt ?? (p.price ? p.price * boxQty : priceRetail * boxQty)
-    return {
-      ...p,
-      priceRetail,
-      priceOpt,
-      price: priceRetail,
-      article: p.article ?? p.size ?? '',
-      createdAt: p.createdAt ?? p.created_at ?? new Date().toISOString(),
-    }
-  })
+function seedUsers(roles) {
+  const ceoRole = roles.find((r) => r.id === 1)
+  return [
+    {
+      id: 1,
+      email: 'ceo@lemonshop.kz',
+      passwordHash: hashPassword('admin123'),
+      name: 'Айдан CEO',
+      roleId: ceoRole?.id ?? 1,
+      theme: 'dark',
+      accent: 'gold',
+      isActive: true,
+      avatarUrl: '',
+      createdAt: new Date().toISOString(),
+    },
+  ]
 }
 
 export function getStore() {
   const stored = load()
-  const rawCategories = stored?.categories ?? defaultCategories
-  const categories = migrateCategories(rawCategories)
-  const rawProducts = stored?.products ?? defaultProducts
-  const products = migrateProducts(rawProducts)
+  const roles = stored?.roles?.length ? stored.roles : DEFAULT_ROLES
+  let users = stored?.users ?? []
+  if (!stored || !users.length) {
+    users = seedUsers(roles)
+    if (!stored) {
+      save({
+        roles,
+        users,
+        employees: [],
+        tasks: [],
+        skills: [],
+      })
+    }
+  }
   return {
-    products,
-    categories,
-    settings: { ...defaultSettings, ...stored?.settings },
-    users: stored?.users ?? defaultUsers,
-    visits: stored?.visits ?? defaultVisits,
-    theme: stored?.theme ?? defaultTheme,
-    orders: stored?.orders ?? defaultOrders,
+    roles,
+    users,
+    employees: stored?.employees ?? [],
+    tasks: stored?.tasks ?? [],
+    skills: stored?.skills ?? [],
   }
 }
 
@@ -96,28 +131,6 @@ export function saveStore(partial) {
   const next = { ...current, ...partial }
   save(next)
   return next
-}
-
-const CART_KEY = KEY + '_cart'
-
-export function loadCart() {
-  try {
-    const raw = localStorage.getItem(CART_KEY)
-    if (!raw) return { mode: 'retail', items: {} }
-    const data = JSON.parse(raw)
-    return { mode: data.mode === 'wholesale' ? 'wholesale' : 'retail', items: data.items || {} }
-  } catch {
-    return { mode: 'retail', items: {} }
-  }
-}
-
-export function saveCart(cartState) {
-  try {
-    localStorage.setItem(CART_KEY, JSON.stringify(cartState))
-    return true
-  } catch {
-    return false
-  }
 }
 
 export function nextId(items, key = 'id') {
@@ -129,38 +142,4 @@ export function nextId(items, key = 'id') {
   return max + 1
 }
 
-/** Строит дерево из плоского списка категорий */
-export function buildCategoryTree(categories) {
-  const byParent = new Map()
-  byParent.set(null, [])
-  categories.forEach((c) => {
-    const pid = c.parentId ?? null
-    if (!byParent.has(pid)) byParent.set(pid, [])
-    byParent.get(pid).push({ ...c, children: [] })
-  })
-  const sort = (arr) => arr.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-  sort(byParent.get(null))
-  function fill(node) {
-    const kids = byParent.get(node.id) || []
-    sort(kids)
-    node.children = kids
-    kids.forEach(fill)
-  }
-  byParent.get(null).forEach(fill)
-  return byParent.get(null)
-}
-
-/** Плоский список категорий с путём (для селектов) */
-export function flatCategoryList(categories) {
-  const tree = buildCategoryTree(categories)
-  const out = []
-  function walk(nodes, path) {
-    nodes.forEach((n) => {
-      const p = path ? `${path} / ${n.name}` : n.name
-      out.push({ id: n.id, name: n.name, path: p })
-      walk(n.children || [], p)
-    })
-  }
-  walk(tree, '')
-  return out
-}
+export const SESSION_KEY = 'lemonshop_hrm_session'
